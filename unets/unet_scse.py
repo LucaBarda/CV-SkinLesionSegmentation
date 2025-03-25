@@ -1,4 +1,4 @@
-from scse import SCSEBlock
+from .scse import SCSEBlock
 
 import tensorflow as tf
 from tensorflow.keras import layers, models
