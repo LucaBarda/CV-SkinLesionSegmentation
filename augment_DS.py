@@ -11,14 +11,14 @@ mask_output_dir = "split/dark_3/darkened_images_masks"  # Folder for saving mask
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(mask_output_dir, exist_ok=True)
 
-# Global HSL adjustments for outside (example values)
-brightness_adjustment = -40       # Global Lightness adjustment (additive) for outside
-temp_adjustment = 0                # Global Hue adjustment (additive) for outside
-saturation_adjustment = 10       # Global Saturation adjustment (-100..+100, used multiplicatively) for outside
+# Global adjustments for outside the lesion
+brightness_adjustment = -40       
+temp_adjustment = 0               
+saturation_adjustment = 10       # (-100..+100, used multiplicatively) 
 
-# HSL Adjustments (Lightroom-style) for specific hue ranges (applied only outside)
+# HSL Adjustments for specific hue ranges (applied only outside)
 # Format: (Hue shift, Saturation shift, Luminance shift)
-# Here, saturation shifts will be applied multiplicatively.
+# Saturation shifts will be applied multiplicatively.
 hsl_adjustments = {
     "red":      (10,  -50, 20),
     "orange":   (0,   -40, 20),
@@ -31,8 +31,8 @@ hsl_adjustments = {
 }
 
 # Additional filter parameters for the inside region and final processing:
-inside_brightness_adjustment = -40 #-120 #-40   # Additional brightness boost inside the lesion
-inside_temp_adjustment = 3            # Raise temperature inside (additive to H channel)
+inside_brightness_adjustment = -40     # DS1: -40 / DS2: -120 
+inside_temp_adjustment = 3             # Raise temperature inside (additive to H channel)
 inside_sat_factor = 0.4                # Lower saturation inside (multiplicative factor)
 blur_kernel = (15, 15)                 # Gaussian blur kernel size
 noise_sigma = 10                       # Gaussian noise standard deviation
@@ -74,16 +74,15 @@ for img_name in image_files:
     # Normalize mask to [0,1]: 1 = inside lesion, 0 = outside
     mask = mask.astype(np.float32) / 255.0
     
-    # ----- STEP 1: Apply Tone Curves (Red & Green) -----
+    # ----- STEP 1: Apply Tone Curves outside the lesion  -----
     b, g, r = cv2.split(image)
     
     r_curve = apply_curves(r, red_curve_points).astype(np.float32)
     g_curve = apply_curves(g, green_curve_points).astype(np.float32)
     
-    # For outside: use curved values; for inside: keep original
     r_new = r_curve * (1 - mask) + r.astype(np.float32) * mask
     g_new = g_curve * (1 - mask) + g.astype(np.float32) * mask
-    b_new = b.astype(np.float32)  # Blue remains unchanged
+    b_new = b.astype(np.float32)  # blue remains unchanged
     
     image_curved = cv2.merge([b_new.astype(np.uint8),
                               g_new.astype(np.uint8),
@@ -137,7 +136,7 @@ for img_name in image_files:
     processed_hls[..., 1] = np.clip(processed_hls[..., 1], 0, 255)
     processed_hls[..., 2] = np.clip(processed_hls[..., 2], 0, 255)
 
-    # Modify brightness after HSL adjustments only outside the lesion
+    # Modify brightness after HSL adjustments
     brightness_factor = 0.55  
     processed_hls[..., 1] = processed_hls[..., 1] *  mask + (processed_hls[..., 1] * brightness_factor) * (1 - mask)
     processed_hls[..., 1] = np.clip(processed_hls[..., 1], 0, 255)
@@ -155,10 +154,8 @@ for img_name in image_files:
     final_hls = processed_hls * (1 - mask[..., None]) + inside_hls * mask[..., None]
     adjusted_image = cv2.cvtColor(final_hls.astype(np.uint8), cv2.COLOR_HLS2BGR)
     
-    # ----- STEP 5: Apply Gaussian Blur Over the Entire Image -----
+    # ----- STEP 5: Apply Gaussian Blur and Gaussian Noise -----
     blurred_image = cv2.GaussianBlur(adjusted_image, blur_kernel, 0)
-    
-    # ----- STEP 6: Add Gaussian Noise -----
     noise = np.random.normal(0, noise_sigma, blurred_image.shape).astype(np.float32)
     noisy_image = blurred_image.astype(np.float32) + noise
     noisy_image = np.clip(noisy_image, 0, 255).astype(np.uint8)
