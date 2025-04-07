@@ -1,8 +1,20 @@
 # CV-Final  
 **Final Deliverable — Computer Vision Project @ Heidelberg University (2025)**
 
-This repository contains the full pipeline and experiments for our Computer Vision project focused on skin lesion classification, with special attention to dataset diversity and preprocessing techniques.
+This repository contains the pipelines and experiments for our Computer Vision project focused on skin lesion segmentation, with special attention to preprocessing techniques aimed at achieving dataset diversity.
 
+---
+
+## 📋 Installation
+
+To set up the environment, make sure you have Python **3.10.7** installed. Then, create and activate a virtual environment:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+---
 ## 🧪 Overview
 
 All evaluation results and analysis are provided in `demo.ipynb`, which includes tests on both:
@@ -18,25 +30,25 @@ For detailed methodology, results, and discussion, please refer to `report.pdf`.
 
 ## 🏗️ Components
 
-### 🔧 Augmentation
-- `augment_DS.py`: Augmentation methods tailored for DS1 and DS2 datasets with dark skin images.
-- `augment_base.py`: Standard baseline augmentations used in Case 2 for model comparison.
-
 ### 🧼 Preprocessing
-- `normalize_images.py`: Contains preprocessing functions including image normalization and a top-hat filter for hair artifact removal.
+- `normalize_images.py`: Contains preprocessing functions including top-hat filter for hair removal and resizing of ISIC-Merged.
+
+### 🔧 Augmentation
+- `augment_base.py`: Standard augmentations used to build Case 2 and Case 3 datasets.
+- `augment_DS.py`: Augmentation pipeline tailored for DS1 and DS2 to enrich datasets with dark skin images (Case 4).
 
 ### 🧠 Architectures
-- All network architectures (custom and adapted from literature) are located in the `units/` directory.
+- All investigated network architectures (custom and adapted from literature) are located in the `unets/` directory.
 
 ### 🏋️ Training
-- `train.py`: Script used to train all models across datasets and augmentation configurations.
+- `train.ipynb`: Script used to train all models across datasets and augmentation configurations.
+- Utility functions and metrics used to train the models with the Tensorflow/Keras framework are located in the `tf_utils/` directory.
 
 ---
 
 ## 📦 Pretrained Models
 
-All trained models are available in our shared drive folder.  
-👉 **[Download Models Here](<insert-your-link-here>)**
+All trained models are available in the `Models/` directory.  
 
 ---
 

@@ -180,3 +180,7 @@ cython_debug/
 
 # Keras models
 *.h5
+*.weights.h5
+
+# Zipped folders
+*.zip
