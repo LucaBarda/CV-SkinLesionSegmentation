@@ -3,6 +3,7 @@
 
 This repository contains the pipelines and experiments for our Computer Vision project focused on skin lesion segmentation, with special attention to preprocessing techniques aimed at achieving dataset diversity.
 
+For a summary on the achieved results please refer to the PDF report.
 ---
 
 ## 📋 Installation
